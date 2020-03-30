@@ -56,6 +56,9 @@ class AGravityGunCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool isHoldingObject;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMeshComponent* grabbedMesh;
+
 public:
 	AGravityGunCharacter();
 
@@ -94,6 +97,9 @@ public:
 	/** Maximum grabbing distance. */
 	static const float MAX_GRAB_DISTANCE;
 
+	/** Throw velocity. */
+	static const float THROW_FORCE;
+
 protected:
 	/** Tick character. */
 	virtual void Tick(float DeltaTime) override;
@@ -104,11 +110,17 @@ protected:
 	/** Handles grab input. */
 	void OnGrab();
 
+	/** Handles throwing input. */
+	void OnThrow();
+
 	/** Grabs an object. */
 	void GrabObject();
 
-	/** Drops an object. */
+	/** Drops the grabbed object. */
 	void DropObject();
+
+	/** Throws the grabbed object. */
+	void ThrowObject();
 
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();

@@ -21,6 +21,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 // AGravityGunCharacter
 
 const float AGravityGunCharacter::MAX_GRAB_DISTANCE = 1000.0;
+const float AGravityGunCharacter::THROW_FORCE = 1000000.0;
 
 AGravityGunCharacter::AGravityGunCharacter()
 {
@@ -132,8 +133,9 @@ void AGravityGunCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// Bind fire event
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGravityGunCharacter::OnFire);
 
-	// Bind grab event	
+	// Bind grab and throw events
 	PlayerInputComponent->BindAction("Grab", IE_Pressed, this, &AGravityGunCharacter::OnGrab);
+	PlayerInputComponent->BindAction("Throw", IE_Pressed, this, &AGravityGunCharacter::OnThrow);
 
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
@@ -208,6 +210,12 @@ void AGravityGunCharacter::OnGrab()
 	else GrabObject();
 }
 
+void AGravityGunCharacter::OnThrow()
+{
+	if (isHoldingObject)
+		ThrowObject();
+}
+
 void AGravityGunCharacter::GrabObject()
 {
 	UWorld* const World = GetWorld();
@@ -229,7 +237,9 @@ void AGravityGunCharacter::GrabObject()
 			ACube* cube = Cast<ACube>(hit.Actor);
 			if (cube) {
 				isHoldingObject = true;
-				physicsHandle->GrabComponentAtLocation(hit.GetComponent(), "None", hit.Location);
+				grabbedMesh = Cast<UMeshComponent>(hit.GetComponent());
+				physicsHandle->GrabComponentAtLocation(grabbedMesh, NAME_None, grabbedMesh->Bounds.GetBox().GetCenter());
+				grabbedMesh->SetAngularDamping(10.0f);
 				cube->OnGrab();
 			}
 		} else {
@@ -242,7 +252,16 @@ void AGravityGunCharacter::GrabObject()
 void AGravityGunCharacter::DropObject()
 {
 	physicsHandle->ReleaseComponent();
+	grabbedMesh->SetAngularDamping(0.0f);
 	isHoldingObject = false;
+}
+
+void AGravityGunCharacter::ThrowObject()
+{
+	DropObject();
+
+	FVector force = this->FirstPersonCameraComponent->GetForwardVector() * THROW_FORCE;
+	grabbedMesh->AddImpulse(force);
 }
 
 void AGravityGunCharacter::OnResetVR()

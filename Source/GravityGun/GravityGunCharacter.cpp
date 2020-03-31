@@ -22,6 +22,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 const float AGravityGunCharacter::MAX_GRAB_DISTANCE = 1000.0;
 const float AGravityGunCharacter::THROW_FORCE = 1000000.0;
+const float AGravityGunCharacter::DROP_DISTANCE_THRESHOLD = 1.5f;
 
 AGravityGunCharacter::AGravityGunCharacter()
 {
@@ -241,6 +242,14 @@ void AGravityGunCharacter::GrabObject()
 				physicsHandle->GrabComponentAtLocation(grabbedMesh, NAME_None, grabbedMesh->Bounds.GetBox().GetCenter());
 				grabbedMesh->SetAngularDamping(10.0f);
 				cube->OnGrab();
+
+				// Play reverse animation
+				if (FireAnimation != NULL) {
+					UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+					if (AnimInstance != NULL) {
+						AnimInstance->Montage_Play(FireAnimation, -1.f, EMontagePlayReturnType::MontageLength, 1.0f);
+					}
+				}
 			}
 		} else {
 			UE_LOG(LogTemp, Log, TEXT("Grab miss"));
@@ -262,6 +271,14 @@ void AGravityGunCharacter::ThrowObject()
 
 	FVector force = this->FirstPersonCameraComponent->GetForwardVector() * THROW_FORCE;
 	grabbedMesh->AddImpulse(force);
+
+	// Play animation
+	if (FireAnimation != NULL) {
+		UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+		if (AnimInstance != NULL) {
+			AnimInstance->Montage_Play(FireAnimation, 1.f);
+		}
+	}
 }
 
 void AGravityGunCharacter::OnResetVR()
@@ -297,8 +314,23 @@ void AGravityGunCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const F
 void AGravityGunCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	// Update grab
+	UpdateGravityGun(DeltaTime);
+}
+
+void AGravityGunCharacter::UpdateGravityGun(float DeltaTime)
+{
+	// Update grabbing location
 	physicsHandle->SetTargetLocation(grabLocation->GetComponentLocation());
+
+	// Drop if object is too far
+	if (isHoldingObject) {
+		FVector cameraPosition = this->FirstPersonCameraComponent->GetComponentLocation();
+		FVector meshPosition = grabbedMesh->GetComponentLocation();
+		float distance = FVector::Distance(cameraPosition, meshPosition);
+		if (distance > MAX_GRAB_DISTANCE * DROP_DISTANCE_THRESHOLD) {
+			DropObject();
+		}
+	}
 }
 
 //Commenting this section out to be consistent with FPS BP template.

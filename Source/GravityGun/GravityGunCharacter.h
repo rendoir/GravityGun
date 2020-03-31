@@ -100,9 +100,15 @@ public:
 	/** Throw velocity. */
 	static const float THROW_FORCE;
 
+	/** Threshold in relation to the grabbing distance at which the object is dropped. */
+	static const float DROP_DISTANCE_THRESHOLD;
+
 protected:
 	/** Tick character. */
 	virtual void Tick(float DeltaTime) override;
+
+	/** Update Gravity Gun. */
+	void UpdateGravityGun(float DeltaTime);
 	
 	/** Fires a projectile. */
 	void OnFire();

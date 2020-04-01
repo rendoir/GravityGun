@@ -59,6 +59,8 @@ class AGravityGunCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMeshComponent* grabbedMesh;
 
+	class IGrabbable* grabbedObject;
+
 public:
 	AGravityGunCharacter();
 

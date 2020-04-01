@@ -12,7 +12,7 @@
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "DrawDebugHelpers.h"	
-#include "Cube.h"	
+#include "Interactable/Grabbable.h"	
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -234,14 +234,15 @@ void AGravityGunCharacter::GrabObject()
 
 		if (hasHit) {
 			UE_LOG(LogTemp, Log, TEXT("Grab hit %s"), *hit.GetActor()->GetClass()->GetName());
-			DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 5.f, ECC_WorldStatic, 5.f);
-			ACube* cube = Cast<ACube>(hit.Actor);
-			if (cube) {
+			//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 5.f, ECC_WorldStatic, 5.f);
+			grabbedObject = Cast<IGrabbable>(hit.Actor);
+			if (grabbedObject) {
+				grabbedObject->OnGrab();
+
 				isHoldingObject = true;
 				grabbedMesh = Cast<UMeshComponent>(hit.GetComponent());
 				physicsHandle->GrabComponentAtLocation(grabbedMesh, NAME_None, grabbedMesh->Bounds.GetBox().GetCenter());
 				grabbedMesh->SetAngularDamping(10.0f);
-				cube->OnGrab();
 
 				// Play reverse animation
 				if (FireAnimation != NULL) {
@@ -253,13 +254,15 @@ void AGravityGunCharacter::GrabObject()
 			}
 		} else {
 			UE_LOG(LogTemp, Log, TEXT("Grab miss"));
-			DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 5.f, ECC_WorldStatic, 5.f);
+			//DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 5.f, ECC_WorldStatic, 5.f);
 		}
 	}
 }
 
 void AGravityGunCharacter::DropObject()
 {
+	grabbedObject->OnRelease();
+
 	physicsHandle->ReleaseComponent();
 	grabbedMesh->SetAngularDamping(0.0f);
 	isHoldingObject = false;

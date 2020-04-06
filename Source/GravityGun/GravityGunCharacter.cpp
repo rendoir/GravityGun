@@ -54,7 +54,6 @@ AGravityGunCharacter::AGravityGunCharacter()
 	FPG_Gun->bCastDynamicShadow = false;
 	FPG_Gun->CastShadow = false;
 	// FPG_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
-	FPG_Gun->SetRelativeRotation(FRotator(280.0f, 0.0f, 90.0f));
 	FPG_Gun->SetupAttachment(RootComponent);
 
 	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
@@ -105,7 +104,7 @@ void AGravityGunCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FPG_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, true), TEXT("GripPoint"));
+	FPG_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("GripPoint"));
 
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)

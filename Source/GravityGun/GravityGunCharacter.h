@@ -56,6 +56,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	/** Sound to play each time an object is grabbed */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	class USoundBase* GrabSound;
+
+	/** Sound to play each time an object is thrown */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	class USoundBase* ThrowSound;
+
 	/** AnimMontage to play each time we grab */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	class UAnimMontage* GrabAnimation;

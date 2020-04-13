@@ -146,6 +146,11 @@ void AGravityGunCharacter::GrabObject()
 						AnimInstance->Montage_Play(GrabAnimation, -1.f, EMontagePlayReturnType::MontageLength, 1.0f);
 					}
 				}
+
+				// Play sound
+				if (GrabSound != NULL) {
+					UGameplayStatics::PlaySoundAtLocation(this, GrabSound, GetActorLocation());
+				}
 			}
 		} else {
 			UE_LOG(LogTemp, Log, TEXT("Grab miss"));
@@ -176,6 +181,11 @@ void AGravityGunCharacter::ThrowObject()
 		if (AnimInstance != NULL) {
 			AnimInstance->Montage_Play(GrabAnimation, 1.f);
 		}
+	}
+
+	// Play sound
+	if (ThrowSound != NULL) {
+		UGameplayStatics::PlaySoundAtLocation(this, ThrowSound, GetActorLocation());
 	}
 }
 
